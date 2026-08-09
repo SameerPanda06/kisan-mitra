@@ -1,0 +1,32 @@
+{
+  "name": "kisan-mitra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kisan Mitra — a farm advisory agent that lives where farmers already are. One handler, many channels.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "tsx scripts/smoke.ts",
+    "eval": "tsx scripts/eval-diagnosis.ts"
+  },
+  "dependencies": {
+    "caspian-sdk": "^0.6.1",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "openai": "^4.77.0",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
