@@ -43,7 +43,20 @@ farmer ── Telegram / email / Discord / Slack
 
 ## Quickstart
 
-**Prereqs:** Node 18+, a `CASPIAN_API_KEY` (`caspian init`), a `GEMINI_API_KEY` (free at aistudio.google.com), and optionally a Telegram bot token from @BotFather.
+**Prereqs:** Node 18+, a `CASPIAN_API_KEY`, a `GEMINI_API_KEY` (free at aistudio.google.com), and optionally a Telegram bot token from @BotFather.
+
+**Get the Caspian key (free, no signup, no card):**
+
+```bash
+curl -s -X POST https://api.trycaspianai.com/v1/projects/sandbox-H \
+  -H 'Content-Type: application/json' -d '{"name":"kisan-mitra"}'
+```
+
+Copy the `api_key` (starts `comm_sandbox_`) into `.env`. Email, Telegram, Discord, and Slack channels are free; the $25 hackathon credit is Featherless inference, not a Caspian payment.
+
+**Get a Telegram bot token:** open @BotFather in Telegram → `/newbot` → name + username → copy the token into `.env`.
+
+Then:
 
 ```bash
 npm install
