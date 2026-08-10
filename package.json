@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "ci": "npm run typecheck && npm test",
     "smoke": "tsx scripts/smoke.ts",
     "eval": "tsx scripts/eval-diagnosis.ts"
   },

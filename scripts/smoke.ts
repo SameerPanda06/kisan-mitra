@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { existsSync, readFileSync } from "node:fs";
+import { config } from "../src/config.js";
 import { Store } from "../src/store.js";
 import { Brain } from "../src/brain.js";
 
@@ -25,9 +26,19 @@ async function show(label: string, text: string | null, media: unknown[] = []): 
 }
 
 async function main(): Promise<void> {
+  const hasGemini = !!config.geminiApiKey;
   await show("help", "help");
   await show("set crop", "meri fasal tomato hai");
   await show("set district", "hamara gaon Bhubaneswar hai");
+
+  if (!hasGemini) {
+    console.log(
+      "\nGEMINI_API_KEY not set — skipping weather tip, crop advice, and photo diagnosis.",
+    );
+    console.log("Copy .env.example to .env and add GEMINI_API_KEY to test those.");
+    return;
+  }
+
   await show("weather", "mausam");
 
   const fixture = "./tests/fixtures/leaf.jpg";

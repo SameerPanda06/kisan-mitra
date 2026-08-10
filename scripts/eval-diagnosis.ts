@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { config } from "../src/config.js";
 import { Store } from "../src/store.js";
 import { Brain } from "../src/brain.js";
 
@@ -31,6 +32,10 @@ function matches(got: string, label: string): boolean {
 }
 
 async function main(): Promise<void> {
+  if (!config.geminiApiKey) {
+    console.log("GEMINI_API_KEY not set. Copy .env.example to .env and add it first.");
+    process.exit(1);
+  }
   if (!existsSync(FIXTURES)) {
     console.log("No tests/fixtures yet.");
     return;
