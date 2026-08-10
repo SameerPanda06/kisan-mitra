@@ -36,8 +36,9 @@ async function main(): Promise<void> {
     return client.connectTelegram({ botToken: config.telegramBotToken });
   });
   await connect("discord", () => {
-    if (!config.discordBotToken) throw new Error("no DISCORD_BOT_TOKEN");
-    return client.connectDiscord({ botToken: config.discordBotToken });
+    if (config.discordBotToken) return client.connectDiscord({ botToken: config.discordBotToken });
+    // No token? One-click install of the shared bot — zero setup.
+    return client.installDiscord({ displayName: "Kisan Mitra" });
   });
   await connect("slack", () => client.installSlack({ displayName: "Kisan Mitra" }));
 
