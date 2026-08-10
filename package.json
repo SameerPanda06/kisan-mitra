@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "ci": "npm run typecheck && npm test",
     "smoke": "tsx scripts/smoke.ts",
-    "eval": "tsx scripts/eval-diagnosis.ts"
+    "eval": "tsx scripts/eval-diagnosis.ts",
+    "fetch:fixtures": "tsx scripts/fetch-fixtures.ts"
   },
   "dependencies": {
     "caspian-sdk": "^0.6.1",
