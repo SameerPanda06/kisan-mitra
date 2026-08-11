@@ -11,7 +11,7 @@ export const config = {
 
   // Gemini — text + vision in one OpenAI-compatible client.
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
-  geminiModel: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
+  geminiModel: process.env.GEMINI_MODEL ?? "gemini-1.5-flash",
   geminiBaseUrl:
     process.env.GEMINI_BASE_URL ??
     "https://generativelanguage.googleapis.com/v1beta/openai/",

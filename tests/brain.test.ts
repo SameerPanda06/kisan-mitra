@@ -45,6 +45,7 @@ describe("brain routing", () => {
   });
 
   it("stores the crop from a profile statement", async () => {
+    mockedComplete.mockResolvedValue("tomato ki kheti? Badhiya chunav. Iska khayal rakhoonga. Gaon batao to mausam bhi doonga.");
     const brain = newBrain();
     const r = await brain.handle(msg("c1", "meri fasal tomato hai"));
     expect(r.text).toContain("tomato");
@@ -74,10 +75,12 @@ describe("brain routing", () => {
   });
 
   it("asks for a location before weather when none is set", async () => {
+    mockedComplete.mockResolvedValue("Pehle apna gaon ya sheher batayein bhai, tabhi mausam bata paoonga.");
     const brain = newBrain();
     const r = await brain.handle(msg("c1", "mausam"));
     expect(r.text).toContain("gaon");
     expect(mockedGetWeather).not.toHaveBeenCalled();
+    expect(mockedComplete).toHaveBeenCalledTimes(1);
   });
 
   it("diagnoses a photo and grounds the treatment in the KB", async () => {
@@ -121,10 +124,11 @@ describe("brain routing", () => {
   });
 
   it("asks for a photo when disease is described in words", async () => {
+    mockedComplete.mockResolvedValue("Bimari dekhne ke liye patte ki photo bhejo, phir bata paoonga.");
     const brain = newBrain();
     const r = await brain.handle(msg("c1", "tomato ke patte peele ho rahe hain"));
     expect(r.text).toContain("photo");
-    expect(mockedComplete).not.toHaveBeenCalled();
+    expect(mockedComplete).toHaveBeenCalledTimes(1);
   });
 
   it("answers a general question through the LLM", async () => {

@@ -34,7 +34,16 @@ export interface ReplySpec {
   media?: Media[];
 }
 
-const PERSONA = `Tum Kisan Mitra ho — Hindustan ke kisaano ka dost jo fasal, mausam aur bimari mein madad karta hai. Hamesha Hinglish mein jawab do (Roman script mein Hindi). Chhota, saaf aur seedha jawab do. Kisaan jis bhasha mein likhe, usi mein jawab do. Dawa ki baat ho to exact dose ke liye apne kshetriya krishi adhikari se milne ki salah zaroor do. Kabhi bhi man se dawai mat batao.`;
+const PERSONA = `Tum "Kisan Mitra" ho — Bharat ke kisaano ka dost aur salahkar. Computer jaisa mat bolo; gaon ka jaankari mitra jaisa bolo — seedha, apnepan se, garam.
+
+Rules:
+1. Hinglish mein jawab do (Roman script mein Hindi). Agar kisaan English mein likhe, to simple English mein jawab do.
+2. Jawab chhota rakho — aam taur par 1-3 line. Ek saath ek se zyada sawal mat poochho.
+3. Kuch puchhna ho to ek hi follow-up sawal poochho, aur ek chhota example bhi do.
+4. Bimari ki pehchan aur ilaaj sirf photo + knowledge base se hota hai. Kabhi man se dawa ya dose mat banao; exact dose ke liye kshetriya krishi adhikari se milne ki salah do.
+5. Aam dekh-rekh ki salah (paani, dhoop, fasal rotation) de sakte ho, par exact khaad/dawa dose nahi.
+6. Har baar alag tareeke se bolo — koi fixed template nahi. Shabdon aur lehje mein tanav rakho.
+7. Kisaan jo likhe usse jude raho, pichhli baat yaad rakho, aur faaltu jankari mat thoso.`;
 
 export class Brain {
   constructor(private store: Store) {}
@@ -50,7 +59,11 @@ export class Brain {
 
     const text = (msg.text ?? "").trim();
     if (!text) {
-      return { text: "Namaste! 🌾 Fasal ki photo bhejein ya sawal likhein. 'help' likh kar dekhein." };
+      return this.naturalReply(
+        msg,
+        "Kisaan ne sirf greeting ya khaali message bheja. Namaste karke poochho kya madad chahiye.",
+        "Namaste! 🌾 Fasal ki photo bhejein ya sawal likhein. 'help' likh kar dekhein.",
+      );
     }
     this.store.addHistory(msg.conversationId, "user", text);
 
@@ -219,30 +232,42 @@ export class Brain {
     const crop = normalizeCrop(lower) ?? "";
     const state = this.store.patchProfile(msg.conversationId, { crop });
     this.store.setLastTopic(msg.conversationId, "profile");
-    const askDistrict = state.profile.district
-      ? ""
-      : "\nAur batayein: aapka gaon ya sheher kaunsa hai? (jaise: 'hamara gaon Bhubaneswar hai'). Mausam aur salah ke liye jaruri hai.";
-    return { text: `Theek hai, ${crop} ki fasal ka khayal rakhoonga. 🌱${askDistrict}` };
+    const what = state.profile.district
+      ? `Kisaan ne apni fasal batayi: ${crop}. Profile poori hai — mausam ya bimari ki photo ke liye taiyaar.`
+      : `Kisaan ne apni fasal batayi: ${crop}. Par gaon/sheher abhi nahi pata — bina gaon ke mausam nahi bata sakte, isliye wahi ek sawal poochho.`;
+    const fallback = `Theek hai, ${crop} ki fasal ka khayal rakhoonga. 🌱${
+      state.profile.district ? "" : "\nAur batayein: aapka gaon ya sheher kaunsa hai? (jaise: 'hamara gaon Bhubaneswar hai')"
+    }`;
+    return this.naturalReply(msg, what, fallback);
   }
 
   private async setDistrict(msg: BrainMessage, loc: string): Promise<ReplySpec> {
     this.store.patchProfile(msg.conversationId, { district: loc });
     this.store.setLastTopic(msg.conversationId, "profile");
-    return { text: `Theek hai, ${loc} ka mausam dekhoonga. Ab kisi bimari ki photo bhejein, ya 'mausam' likhein.` };
+    const hasCrop = this.store.get(msg.conversationId).profile.crop;
+    const what = hasCrop
+      ? `Kisaan ne apna gaon bataya: ${loc}. Profile poori hai — mausam ya bimari ki photo ke liye taiyaar.`
+      : `Kisaan ne apna gaon bataya: ${loc}. Fasal abhi pata nahi — kaunsi fasal ugate hain, wahi poochh sakte ho.`;
+    const fallback = `Theek hai, ${loc} ka mausam dekhoonga. Ab kisi bimari ki photo bhejein, ya 'mausam' likhein.`;
+    return this.naturalReply(msg, what, fallback);
   }
 
   private async weatherFlow(msg: BrainMessage): Promise<ReplySpec> {
     const state = this.store.get(msg.conversationId);
     if (!state.profile.district) {
-      return {
-        text: "Mausam batane ke liye apna gaon/sheher batayein. Jaise: 'hamara gaon Bhubaneswar hai'.",
-      };
+      return this.naturalReply(
+        msg,
+        "Kisaan ne mausam poocha, par gaon/sheher nahi bataya. Wahi ek sawal poochho, example ke saath.",
+        "Mausam batane ke liye apna gaon/sheher batayein. Jaise: 'hamara gaon Bhubaneswar hai'.",
+      );
     }
     const report = await getWeather(state.profile.district);
     if (!report) {
-      return {
-        text: `'${state.profile.district}' nahi mila. Kripya sahi naam batayein, jaise 'hamara gaon Cuttack hai'.`,
-      };
+      return this.naturalReply(
+        msg,
+        `"${state.profile.district}" naam ka gaon mausam mein nahi mila. Poochho ki sahi naam kya hai, example ke saath.`,
+        `'${state.profile.district}' nahi mila. Kripya sahi naam batayein, jaise 'hamara gaon Cuttack hai'.`,
+      );
     }
     const tip = await this.cropTip(state, report);
     const blocks = weatherCard(report);
@@ -255,7 +280,11 @@ export class Brain {
     const state = this.store.get(msg.conversationId);
     const d = state.lastDiagnosis;
     if (!d) {
-      return { text: "Pehle kisi bimari ki photo bhejein, phir ilaaj bata paoonga." };
+      return this.naturalReply(
+        msg,
+        "Kisaan ne ilaaj poocha, par abhi koi bimari ki photo ya diagnosis nahi hai. Photo maang lo.",
+        "Pehle kisi bimari ki photo bhejein, phir ilaaj bata paoonga.",
+      );
     }
     const e = findEntry(allEntries(), d.disease);
     const line = e
@@ -266,13 +295,15 @@ export class Brain {
 
   private async textOnlyDisease(msg: BrainMessage, lower: string): Promise<ReplySpec> {
     const crop = normalizeCrop(lower);
-    let text = "Patte ki photo bhejein, bimari theek se bata paoonga. 📸\n";
+    const state = this.store.get(msg.conversationId);
+    const what = "Kisaan ne bimari ka lakshan shabdon mein likha, photo nahi bheji. Bimari pehchanne ke liye patte ki photo chahiye — wahi maang lo.";
+    let fallback = "Patte ki photo bhejein, bimari theek se bata paoonga. 📸\n";
     if (!crop) {
-      text += "Aur batayein, kaunsi fasal hai? (jaise: 'meri fasal tomato hai')";
-    } else if (!this.store.get(msg.conversationId).profile.crop) {
-      text += `Aapki fasal ${crop} hai na? 'meri fasal ${crop} hai' likh kar profile set kar lein.`;
+      fallback += "Aur batayein, kaunsi fasal hai? (jaise: 'meri fasal tomato hai')";
+    } else if (!state.profile.crop) {
+      fallback += `Aapki fasal ${crop} hai na? 'meri fasal ${crop} hai' likh kar profile set kar lein.`;
     }
-    return { text };
+    return this.naturalReply(msg, what, fallback);
   }
 
   private async generalQuestion(msg: BrainMessage, text: string): Promise<ReplySpec> {
@@ -296,6 +327,46 @@ export class Brain {
     } catch (e) {
       console.error("[brain] generalQuestion failed:", e);
       return { text: "Abhi mere paas jawab nahi. Kripya dobara koshish karein ya photo bhejein. 🙏" };
+    }
+  }
+
+  /**
+   * Natural-language reply for conversational moments (profile confirmations,
+   * "what next" prompts). The LLM writes it fresh each time so it never sounds
+   * like a canned template. `what` tells the model what just happened; profile
+   * and recent history give it the context to sound like a friend.
+   */
+  private async converse(msg: BrainMessage, what: string): Promise<string> {
+    const state = this.store.get(msg.conversationId);
+    const bits: string[] = [];
+    if (state.profile.crop) bits.push(`fasal: ${state.profile.crop}`);
+    if (state.profile.district) bits.push(`gaon: ${state.profile.district}`);
+    const profileLine = bits.length
+      ? `Kisaan ki jaankari: ${bits.join(", ")}.`
+      : "Kisaan ki fasal/gaon abhi pata nahi.";
+    const history = state.history
+      .slice(-4)
+      .map((h) => `${h.role === "user" ? "Kisaan" : "Kisan Mitra"}: ${h.text}`)
+      .join("\n");
+    const sys = `${PERSONA}\n\n${profileLine}\nJo hua: ${what}${history ? `\n\nPehli baatcheet:\n${history}` : ""}`;
+    const out = await complete(
+      [
+        { role: "system", content: sys },
+        { role: "user", content: `Kisaan ne abhi likha: "${msg.text ?? ""}". Iska swabhavik (natural) jawab do.` },
+      ],
+      { temperature: 0.8, maxTokens: 300 },
+    );
+    return out.trim();
+  }
+
+  /** converse with a safe fallback so a slow/failed LLM call never blocks a farmer. */
+  private async naturalReply(msg: BrainMessage, what: string, fallback: string): Promise<ReplySpec> {
+    try {
+      const text = await this.converse(msg, what);
+      return { text: text || fallback };
+    } catch (e) {
+      console.error("[brain] converse failed:", e);
+      return { text: fallback };
     }
   }
 
