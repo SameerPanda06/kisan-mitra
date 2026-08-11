@@ -79,7 +79,7 @@ caspian-sdk · Gemini 2.5 Flash (vision + text) · Open-Meteo · Node.js + TypeS
 - [ ] Public GitHub repo
 - [ ] Demo video (2:00, real run) — see `demo/DEMO_SCRIPT.md`
 - [ ] Project screenshot (the diagnosis card on a phone)
-- [ ] Live URL (Render) in the "Try it out" field
+- [ ] Live URL in the "Try it out" field: `https://kisan-mitra-mqgy.onrender.com`
 - [ ] List email + Telegram (and Discord + Slack) as the channels
 - [ ] Devpost tags: AI, Agriculture, Hinglish, Gemini, TypeScript, Caspian
 - [ ] Submit before **Aug 17, 2026, 00:00 IST**
