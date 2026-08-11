@@ -1,6 +1,6 @@
 # Kisan Mitra 🌾
 
-*Your farm fits in your pocket.* A farm advisory agent that lives where farmers already are — Telegram, WhatsApp-style chat, and email — instead of inside an app nobody installs.
+*Your farm fits in your pocket.* A farm advisory agent that lives where farmers already are Telegram, WhatsApp-style chat, and email instead of inside an app nobody installs.
 
 Built for the [Caspian Buildathon](https://caspian.devpost.com/): **one agent identity, one handler, many channels.** The same `onMessage` handler answers on email, Telegram, Discord, and Slack. No dashboards, no app store, no reading barrier. A farmer texts a photo of a sick leaf and gets a diagnosis, a treatment, and the week's weather back in Hinglish.
 
@@ -10,9 +10,9 @@ Built for the [Caspian Buildathon](https://caspian.devpost.com/): **one agent id
 
 Kisan Mitra is that number:
 
-- **Photo diagnosis.** Send a photo of a leaf with spots; the agent reads it with Gemini vision and returns a grounded diagnosis + treatment. Every treatment comes from a curated knowledge base — the agent never invents a cure.
+- **Photo diagnosis.** Send a photo of a leaf with spots; the agent reads it with Gemini vision and returns a grounded diagnosis + treatment. Every treatment comes from a curated knowledge base the agent never invents a cure.
 - **Weather, spoken plainly.** "mausam" returns a 3-day forecast with a crop-specific tip.
-- **Remembers you.** One-time profile setup — "meri fasal tomato hai", "hamara gaon Bhubaneswar hai" — and it tailors everything to your crop and district.
+- **Remembers you.** One-time profile setup "meri fasal tomato hai", "hamara gaon Bhubaneswar hai" — and it tailors everything to your crop and district.
 - **Acts without being asked.** Every morning at 06:30 IST it messages each farmer the day's weather and one crop tip.
 - **One identity.** The same agent, the same memory, across email + Telegram + Discord + Slack.
 
@@ -34,7 +34,7 @@ farmer ── Telegram / email / Discord / Slack
 ```
 
 - `src/brain.ts` — the single brain behind every channel. Regex-first routing (deterministic for the demo), LLM for diagnosis and free-form advice.
-- `src/knowledge/diseases.ts` — ~38 curated crop-disease entries. The KB is the **only** allowed set of diagnoses; anything the model can't match becomes "unknown" with a request for a clearer photo.
+- `src/knowledge/diseases.ts`  ~38 curated crop-disease entries. The KB is the **only** allowed set of diagnoses; anything the model can't match becomes "unknown" with a request for a clearer photo.
 - `src/llm.ts` — Gemini 2.5 Flash over Google's OpenAI-compatible endpoint (text + vision in one client, same provider pattern as Nexora).
 - `src/weather.ts` — Open-Meteo, free, no key.
 - `src/store.ts` — per-conversation profile + last diagnosis, persisted to JSON.
