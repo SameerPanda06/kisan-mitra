@@ -73,7 +73,15 @@ function startHealthServer(): void {
     res.writeHead(200, { "content-type": "application/json" });
     res.end(JSON.stringify({ ok: true, agent: "kisan-mitra" }));
   });
-  server.listen(config.port, () => {
+  // Render expects the app to bind 0.0.0.0. Never let the health server kill
+  // the agent: if the port is taken (a second local instance), log and keep
+  // the channels running instead of crashing the process.
+  server.on("error", (err: NodeJS.ErrnoException) => {
+    console.warn(
+      `[health] ${err.code === "EADDRINUSE" ? `port ${config.port} in use, health server skipped` : `server error: ${err.message}`}`,
+    );
+  });
+  server.listen(config.port, "0.0.0.0", () => {
     console.log(`[health] listening on :${config.port}`);
   });
 }

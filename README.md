@@ -34,7 +34,7 @@ farmer ── Telegram / email / Discord / Slack
 ```
 
 - `src/brain.ts` the single brain behind every channel. Regex-first routing (deterministic for the demo), LLM for diagnosis and free-form advice.
-- `src/knowledge/diseases.ts`  ~38 curated crop-disease entries. The KB is the **only** allowed set of diagnoses; anything the model can't match becomes "unknown" with a request for a clearer photo.
+- `src/knowledge/diseases.ts`  40 curated crop-disease entries across 11 crops. The KB is the **only** allowed set of diagnoses; anything the model can't match becomes "unknown" with a request for a clearer photo.
 - `src/llm.ts` Gemini 2.5 Flash over Google's OpenAI-compatible endpoint (text + vision in one client, same provider pattern as Nexora).
 - `src/weather.ts` Open-Meteo, free, no key.
 - `src/store.ts` per-conversation profile + last diagnosis, persisted to JSON.
@@ -75,7 +75,7 @@ npm run smoke              # needs only GEMINI_API_KEY
 **Tests:**
 
 ```bash
-npm test                   # 14 unit tests, no network, no keys
+npm test                   # 30 unit tests, no network, no keys
 npm run typecheck
 ```
 

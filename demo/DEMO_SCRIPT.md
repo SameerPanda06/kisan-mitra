@@ -23,7 +23,7 @@ device with the agent's Telegram open.
 ## Live-demo backup (if asked to demo live)
 
 - Pre-answer **"which channels?"** → "email and Telegram through the same handler, plus Discord and Slack connected."
-- Pre-answer **"is the model fine-tuned?"** → "No — zero-shot Gemini vision grounded against a 38-disease curated KB. The KB is the guardrail."
+- Pre-answer **"is the model fine-tuned?"** → "No — zero-shot Gemini vision grounded against a 40-disease curated KB. The KB is the guardrail."
 - If the network misbehaves, fall back to the email channel: email a photo to the agent, which reads it from the email HTML.
 
 ## Good shots to grab

@@ -1,20 +1,32 @@
 name: Keep Kisan Mitra Alive
 
 # Render free tier sleeps the service after 15 min idle, which would stall
-# replies. This pings /health roughly every 13 min so the agent stays warm.
+# replies. This pings /health every 10 min so the agent stays warm.
 # Update the URL after the first Render deploy (your-app.onrender.com).
 
 on:
   schedule:
-    - cron: "3-59/13 * * * *"  # off-minute, <15 min apart
+    - cron: "3-59/10 * * * *"  # off-minute, <15 min apart
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
+      # The first request to a sleeping instance is consumed by the cold start
+      # and returns nothing (503 / timeout). Retry a few times so the second
+      # attempt lands on the now-warm instance and keeps it alive.
       - name: Wake Kisan Mitra
-        run: >
-          curl -s -o /dev/null -w "health: %{http_code} in %{time_total}s\n"
-          --max-time 90
-          "https://kisan-mitra.onrender.com/health"
+        run: |
+          for i in 1 2 3 4 5 6; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 \
+              "https://kisan-mitra.onrender.com/health" || echo "none")
+            echo "attempt $i: HTTP ${code}"
+            if [ "$code" = "200" ]; then
+              echo "awake"
+              exit 0
+            fi
+            sleep 12
+          done
+          echo "not reachable after 6 attempts"
+          exit 1

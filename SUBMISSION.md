@@ -2,6 +2,10 @@
 
 Copy-paste ready. Title, tagline, and description for the Caspian Buildathon.
 
+## Repo description (GitHub → About → description)
+
+Farm advisory agent for the Caspian Buildathon — photo diagnosis, live weather, and a morning tip in Hinglish, on Telegram, email, Discord, and Slack through one handler.
+
 ## Title
 
 **Kisan Mitra — your farm fits in your pocket**
@@ -18,7 +22,7 @@ An AI agent that diagnoses crop disease, reads the weather, and texts the farmer
 
 ### What it does
 
-1. **Photo diagnosis.** A farmer texts a photo of a sick leaf. Gemini vision reads it, and the agent matches it against a curated knowledge base of 38 crop diseases across 11 crops (tomato, potato, chilli, brinjal, rice, wheat, maize, okra, mango, cotton, onion). Every treatment comes from the KB — the agent never invents a cure. If nothing matches, it says so and asks for a clearer photo.
+1. **Photo diagnosis.** A farmer texts a photo of a sick leaf. Gemini vision reads it, and the agent matches it against a curated knowledge base of 40 crop diseases across 11 crops (tomato, potato, chilli, brinjal, rice, wheat, maize, okra, mango, cotton, onion). Every treatment comes from the KB — the agent never invents a cure. If nothing matches, it says so and asks for a clearer photo.
 2. **Weather, spoken plainly.** "mausam" returns a live 3-day forecast for the farmer's district with a crop-specific tip.
 3. **Remembers you.** One-time setup — "meri fasal tomato hai", "hamara gaon Bhubaneswar hai" — and every answer is tailored to their crop and place.
 4. **Acts without being asked.** Every morning at 06:30 IST, it messages each farmer the day's weather and one crop tip. The agent has hands: it doesn't wait.
@@ -67,7 +71,7 @@ caspian-sdk · Gemini 2.5 Flash (vision + text) · Open-Meteo · Node.js + TypeS
 | `src/knowledge/diseases.ts` | curated disease KB |
 | `src/weather.ts` | Open-Meteo client |
 | `src/proactive.ts` | morning advisory |
-| `tests/` | 14 unit tests, no network |
+| `tests/` | 30 unit tests, no network |
 | `demo/DEMO_SCRIPT.md` | the demo video shot list |
 
 ## Submission checklist
