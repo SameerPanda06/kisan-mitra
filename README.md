@@ -95,7 +95,7 @@ Drop a real leaf photo at `tests/fixtures/leaf.jpg` and `npm run smoke` will run
 1. Push this repo to GitHub.
 2. On Render, create a Blueprint from `render.yaml` (or a Web Service: build `npm ci`, start `npm start`, health check `/health`).
 3. Set `GEMINI_API_KEY`, `CASPIAN_API_KEY`, and optionally `TELEGRAM_BOT_TOKEN`, `DISCORD_BOT_TOKEN` in the service Environment.
-4. Edit `.github/workflows/keep-alive.yml` to your real `.onrender.com` URL — the cron pings `/health` every ~13 min so the free tier never sleeps.
+4. Edit `.github/workflows/keep-alive.yml` to your real `.onrender.com` URL. Render may suffix the name (this service is `kisan-mitra-mqgy`), and the cron pings `/health` every 10 min so the free tier never sleeps.
 
 Note: Render free-tier disk is ephemeral; the store (farmer profiles) resets on a cold restart. Fine for a demo; a future version swaps in Postgres.
 

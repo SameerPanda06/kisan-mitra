@@ -20,7 +20,7 @@ jobs:
         run: |
           for i in 1 2 3 4 5 6; do
             code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 \
-              "https://kisan-mitra.onrender.com/health" || echo "none")
+              "https://kisan-mitra-mqgy.onrender.com/health" || echo "none")
             echo "attempt $i: HTTP ${code}"
             if [ "$code" = "200" ]; then
               echo "awake"
