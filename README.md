@@ -33,13 +33,13 @@ farmer ── Telegram / email / Discord / Slack
    + diseases.ts         (JSON)
 ```
 
-- `src/brain.ts` — the single brain behind every channel. Regex-first routing (deterministic for the demo), LLM for diagnosis and free-form advice.
+- `src/brain.ts` the single brain behind every channel. Regex-first routing (deterministic for the demo), LLM for diagnosis and free-form advice.
 - `src/knowledge/diseases.ts`  ~38 curated crop-disease entries. The KB is the **only** allowed set of diagnoses; anything the model can't match becomes "unknown" with a request for a clearer photo.
-- `src/llm.ts` — Gemini 2.5 Flash over Google's OpenAI-compatible endpoint (text + vision in one client, same provider pattern as Nexora).
-- `src/weather.ts` — Open-Meteo, free, no key.
-- `src/store.ts` — per-conversation profile + last diagnosis, persisted to JSON.
-- `src/proactive.ts` — daily 06:30 IST morning advisory via `send_message`.
-- `src/cards.ts` — provider-neutral blocks (cards, images, buttons) that render natively on each channel.
+- `src/llm.ts` Gemini 2.5 Flash over Google's OpenAI-compatible endpoint (text + vision in one client, same provider pattern as Nexora).
+- `src/weather.ts` Open-Meteo, free, no key.
+- `src/store.ts` per-conversation profile + last diagnosis, persisted to JSON.
+- `src/proactive.ts` daily 06:30 IST morning advisory via `send_message`.
+- `src/cards.ts` provider-neutral blocks (cards, images, buttons) that render natively on each channel.
 
 ## Quickstart
 
@@ -64,7 +64,7 @@ cp .env.example .env        # fill in the keys
 npm run dev                 # connects channels + listens
 ```
 
-You should see email, telegram, and slack connect, and `listen()` start. Message your agent on Telegram, email the agent's address, and invite the Slack app — the same handler answers all of them.
+You should see email, telegram, and slack connect, and `listen()` start. Message your agent on Telegram, email the agent's address, and invite the Slack app the same handler answers all of them.
 
 **No channels yet?** Run the offline smoke test, which exercises the brain without any channel:
 
@@ -117,4 +117,4 @@ Full shot list in `demo/DEMO_SCRIPT.md`.
 
 ## License
 
-MIT — code written for the Caspian Buildathon 2026.
+MIT code written for the Caspian Buildathon 2026.
