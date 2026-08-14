@@ -34,16 +34,20 @@ export interface ReplySpec {
   media?: Media[];
 }
 
-const PERSONA = `Tum "Kisan Mitra" ho — Bharat ke kisaano ka dost aur salahkar. Computer jaisa mat bolo; gaon ka jaankari mitra jaisa bolo — seedha, apnepan se, garam.
+const PERSONA = `Tum "Kisan Mitra" ho — Bharat ke kisaano ka bharosa mitra aur salahkar. Computer/robot jaisa mat bolo. Gaon ke anubhavi buzurga jaisa bolo — seedha, apnepan se, garam, aur kam shabdon mein.
 
-Rules:
-1. Hinglish mein jawab do (Roman script mein Hindi). Agar kisaan English mein likhe, to simple English mein jawab do.
-2. Jawab chhota rakho — aam taur par 1-3 line. Ek saath ek se zyada sawal mat poochho.
-3. Kuch puchhna ho to ek hi follow-up sawal poochho, aur ek chhota example bhi do.
-4. Bimari ki pehchan aur ilaaj sirf photo + knowledge base se hota hai. Kabhi man se dawa ya dose mat banao; exact dose ke liye kshetriya krishi adhikari se milne ki salah do.
-5. Aam dekh-rekh ki salah (paani, dhoop, fasal rotation) de sakte ho, par exact khaad/dawa dose nahi.
-6. Har baar alag tareeke se bolo — koi fixed template nahi. Shabdon aur lehje mein tanav rakho.
-7. Kisaan jo likhe usse jude raho, pichhli baat yaad rakho, aur faaltu jankari mat thoso.`;
+**Niyam (hard rules):**
+1. **Bhasha:** Hinglish (Roman script Hindi). Kisaan English likhe → simple English jawab. Kabhi pure Hindi/Devanagari mat bolo.
+2. **Lambai:** 1-3 line MAX. Ek baar mein ek hi baat bolo. Fizool bakwas nahi.
+3. **Sawal:** Agar puchhna ho to **ek hi** follow-up sawal, saath mein ek chhota udaharan bhi do.
+4. **Bimari/Ilaj:** Sirf **photo + knowledge base** se. Kabhi man se dawa, dose, ya spray schedule mat banao. Exact dose ke liye hamesha: "kshetriya krishi adhikari / KVK se milen" bolo.
+5. **Aam salah:** Paani, dhoop, fasal rotation, khaad timing de sakte ho — par **exact quantity nahi**.
+6. **Variety:** Har baar alag andaaz se bolo. Koi canned template, koi repeated phrase nahi.
+7. **Action-oriented:** Har jawab ke baad kisaan ko **clear next step** batao (button tap, photo bhejein, mausam dekhein, profile set karein).
+8. **Samman:** "Bhaiya", "ji", "kaka" jaise samman wale shabd use karo. Kisan ko "aap" bolo, "tum" nahi.
+9. **Sachai:** Agar nahi pata to bolo "mujhe nahi pata, photo bhejein ya KVK se puchhein." Jhooth mat bolo.
+10. **Memory:** Kisaan ki fasal, gaon, pehli bimari yaad rakho. Baar baar mat poochho.
+`;
 
 export class Brain {
   constructor(private store: Store) {}
@@ -273,7 +277,15 @@ export class Brain {
     const blocks = weatherCard(report);
     if (tip) blocks.push({ type: "text", text: tip });
     this.store.setLastTopic(msg.conversationId, "weather");
-    return { text: report.summary, blocks };
+    // Natural conversational text instead of raw summary
+    const what = `Kisaan ne mausam poocha. District: ${state.profile.district}. Forecast: ${report.summary}`;
+    try {
+      const text = await this.converse(msg, what);
+      return { text: text || report.summary, blocks };
+    } catch (e) {
+      console.error("[brain] weatherFlow converse failed:", e);
+      return { text: report.summary, blocks };
+    }
   }
 
   private async ilajFlow(msg: BrainMessage): Promise<ReplySpec> {
@@ -344,17 +356,18 @@ export class Brain {
     const profileLine = bits.length
       ? `Kisaan ki jaankari: ${bits.join(", ")}.`
       : "Kisaan ki fasal/gaon abhi pata nahi.";
+    const lastTopic = state.lastTopic ? `Pichla topic: ${state.lastTopic}.` : "";
     const history = state.history
-      .slice(-4)
+      .slice(-3)
       .map((h) => `${h.role === "user" ? "Kisaan" : "Kisan Mitra"}: ${h.text}`)
       .join("\n");
-    const sys = `${PERSONA}\n\n${profileLine}\nJo hua: ${what}${history ? `\n\nPehli baatcheet:\n${history}` : ""}`;
+    const sys = `${PERSONA}\n\n${profileLine} ${lastTopic}${history ? `\n\nBaatcheet:\n${history}` : ""}`;
     const out = await complete(
       [
         { role: "system", content: sys },
-        { role: "user", content: `Kisaan ne abhi likha: "${msg.text ?? ""}". Iska swabhavik (natural) jawab do.` },
+        { role: "user", content: `Kisaan ne abhi likha: "${msg.text ?? ""}". Iska swabhavik jawab do (1-2 line, agla step batao).` },
       ],
-      { temperature: 0.8, maxTokens: 300 },
+      { temperature: 0.4, maxTokens: 200 },
     );
     return out.trim();
   }
@@ -445,7 +458,8 @@ function extractLocation(t: string): string | null {
 
 function isCropStatement(t: string): boolean {
   if (!normalizeCrop(t)) return false;
-  return /fasal|crop|ugat|boyi|bote|lagai|lagaye|lagaata|plant|boye/.test(t);
+  // Must have explicit crop-setting intent words, not just crop name
+  return /\b(meri fasal|mera fasal|main .* ugata|kheti karta|fasal .* hai|fasal .* hoti|boyi|lagai|lagaye)\b/.test(t);
 }
 
 function isIlajRequest(t: string): boolean {
@@ -457,5 +471,9 @@ function isHelp(t: string): boolean {
 }
 
 function isDiseaseText(t: string): boolean {
-  return /patte? peele|peele patte|dhabbe?|daag|keeda|kida|kidi|beemari|bimari|rog|gilta|gal rah|sad rah|mud rah|mudna|sukh rah|sukhra|whitefly|sundi|illee|kilni|jhaanth/.test(t);
+  // Require explicit disease context words, not just crop names or symptoms alone
+  return /\b(bimari|beemari|rog|kya bimari|kaunsi bimari|pehchano|identify|diagnose|ilaaj chahiye|dawai chahiye)\b/.test(t) ||
+         /(patte? (peele|sukh|gal|mud))./.test(t) ||
+         /(dhabbe? (hai|hain|lage|lagi|lag rahe))./.test(t) ||
+         /(keeda|kida|kidi|sundi|illee|kilni|whitefly).{0,10}(hai|hain|laga|lage)/.test(t);
 }

@@ -66,10 +66,11 @@ describe("brain routing", () => {
         { date: "2026-08-10", tMax: 32, tMin: 26, rainMm: 0, rainProb: 10, windKmh: 12, uv: 7 },
       ],
     });
+    mockedComplete.mockResolvedValue("Bhubaneswar ka mausam: aaj sookha, kal barish ka chance. Tomato ke liye paani kam dein.");
     const brain = newBrain();
     await brain.handle(msg("c1", "hamara gaon Bhubaneswar hai"));
     const r = await brain.handle(msg("c1", "mausam"));
-    expect(r.text).toContain("Mostly dry today.");
+    expect(r.text).toContain("Bhubaneswar");
     expect(r.blocks?.some((b) => b.type === "heading")).toBe(true);
     expect(mockedGetWeather).toHaveBeenCalledWith("Bhubaneswar");
   });
@@ -153,10 +154,11 @@ describe("brain routing", () => {
         { date: "2026-08-10", tMax: 32, tMin: 26, rainMm: 0, rainProb: 10, windKmh: 12, uv: 7 },
       ],
     });
+    mockedComplete.mockResolvedValue("Bhubaneswar ka mausam: aaj sookha, kal barish ka chance. Tomato ke liye paani kam dein.");
     const brain = newBrain();
     await brain.handle(msg("c1", "hamara gaon Bhubaneswar hai"));
     const r = await brain.handleValue("c1", "mausam");
-    expect(r.text).toContain("Mostly dry today.");
+    expect(r.text).toContain("Bhubaneswar");
   });
 
   it("routes a tapped Ilaj button to the stored treatment", async () => {
