@@ -61,6 +61,14 @@ async function main(): Promise<void> {
   });
 
   startProactive(client, store, brain);
+
+  // Periodic memory cleanup — every 30 minutes, prune old history so
+  // long conversations don't confuse the model with stale context.
+  setInterval(() => {
+    console.log("[maintenance] running conversation memory cleanup");
+    brain.runMaintenance();
+  }, 30 * 60 * 1000);
+
   startHealthServer();
 
   console.log("Kisan Mitra is listening on email + telegram + discord + slack — one handler.");

@@ -25,6 +25,8 @@ export interface CompleteOptions {
 const client = new OpenAI({
   apiKey: config.geminiApiKey,
   baseURL: config.geminiBaseUrl,
+  timeout: 20_000,
+  maxRetries: 1,
 });
 
 /** Chat completion, optionally in JSON mode (with a plain retry fallback). */

@@ -21,7 +21,6 @@ async function test(label: string, text: string | null, media: unknown[] = []): 
   console.log(`\n── ${label} ──`);
   console.log(spec.text);
   if (spec.blocks?.length) console.log(`[${spec.blocks.length} blocks: ${spec.blocks.map((b) => b.type).join(", ")}]`);
-  return spec;
 }
 
 async function main(): Promise<void> {

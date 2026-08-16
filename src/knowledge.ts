@@ -11,7 +11,7 @@ const CROP_SYNONYMS: Record<string, string[]> = {
   chilli: ["chilli", "chili", "chillies", "mirch", "mirchi"],
   brinjal: ["brinjal", "eggplant", "baingan", "baigan"],
   rice: ["rice", "paddy", "dhan", "chaaval", "chawal"],
-  wheat: ["wheat", "gehoon", "gehun", "gahun"],
+  wheat: ["wheat", "gehoon", "gehun", "gahun", "gehu"],
   maize: ["maize", "corn", "makka", "bhutta", "makkai"],
   okra: ["okra", "bhindi", "lady finger", "ladyfinger"],
   mango: ["mango", "aam"],
@@ -57,4 +57,47 @@ export function kbPromptBlock(entries: DiseaseEntry[]): string {
 /** Case-insensitive lookup of a disease by its English name. */
 export function findEntry(entries: DiseaseEntry[], name: string): DiseaseEntry | null {
   return entries.find((e) => e.name.toLowerCase() === name.trim().toLowerCase()) ?? null;
+}
+
+/**
+ * Match a farmer's words to KB entries by their symptom keywords. Used for
+ * text-only disease messages (no photo) so the agent can ground a reply in the
+ * KB without a vision call or an ungrounded LLM answer.
+ */
+const SYMPTOM_KEYWORDS: Record<string, string[]> = {
+  "safed dhabe": ["Powdery Mildew", "Churni phuphendi"],
+  "bhure dhabe": ["Brown Spot", "Brown Rust", "Baingani dhabbe", "Matti dhabbe"],
+  "kaale dhabe": ["Black Rust", "Anthracnose", "Kona dhabbe"],
+  "peele dhabe": ["Yellow Rust", "Yellow Vein Mosaic Virus", "Purple Blotch"],
+  "dhabbe": ["Leaf Spot", "Patta dhabbe"],
+  "jhulsa": ["Blast jhulsa", "Patta jhulsa", "Der se jhulsa", "Shuruaati jhulsa", "Common Rust"],
+  "mud": ["Patta mudna", "Patta chhota rog", "Peeli nas rog"],
+  "keeda": ["Phal ka keeda", "Murjhana", "Patta chhota rog"],
+  "murjha": ["Mala rog", "Murjhana", "Bacteriyai murjhana"],
+  "gal": ["Phal galana", "Phal sadna", "Phal ka keeda"],
+  "patta peela": ["Yellow Rust", "Powdery Mildew", "Peeli nas rog"],
+  "sukh": ["Leaf Curl Virus", "Fusarium Wilt", "Cercospora Leaf Spot"],
+};
+
+export function matchSymptoms(text: string, crop?: string): DiseaseEntry | null {
+  const q = text.toLowerCase();
+  const pool = crop ? entriesForCrop(crop) : allEntries();
+  let best: DiseaseEntry | null = null;
+  let bestScore = 0;
+  for (const entry of pool) {
+    let score = 0;
+    for (const [kw, names] of Object.entries(SYMPTOM_KEYWORDS)) {
+      if (q.includes(kw) && names.some((n) => entry.name === n || entry.hindi === n)) score++;
+    }
+    // also match the entry's own symptom strings loosely
+    for (const sym of entry.symptoms) {
+      const head = sym.toLowerCase().split(" ").slice(0, 2).join(" ");
+      if (head.length > 4 && q.includes(head)) score++;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      best = entry;
+    }
+  }
+  return bestScore > 0 ? best : null;
 }

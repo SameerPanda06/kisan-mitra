@@ -66,22 +66,22 @@ describe("brain routing", () => {
         { date: "2026-08-10", tMax: 32, tMin: 26, rainMm: 0, rainProb: 10, windKmh: 12, uv: 7 },
       ],
     });
-    mockedComplete.mockResolvedValue("Bhubaneswar ka mausam: aaj sookha, kal barish ka chance. Tomato ke liye paani kam dein.");
     const brain = newBrain();
     await brain.handle(msg("c1", "hamara gaon Bhubaneswar hai"));
     const r = await brain.handle(msg("c1", "mausam"));
     expect(r.text).toContain("Bhubaneswar");
     expect(r.blocks?.some((b) => b.type === "heading")).toBe(true);
     expect(mockedGetWeather).toHaveBeenCalledWith("Bhubaneswar");
+    // No LLM call for the weather reply now (deterministic + KB tips)
+    expect(mockedComplete).not.toHaveBeenCalled();
   });
 
   it("asks for a location before weather when none is set", async () => {
-    mockedComplete.mockResolvedValue("Pehle apna gaon ya sheher batayein bhai, tabhi mausam bata paoonga.");
     const brain = newBrain();
     const r = await brain.handle(msg("c1", "mausam"));
     expect(r.text).toContain("gaon");
     expect(mockedGetWeather).not.toHaveBeenCalled();
-    expect(mockedComplete).toHaveBeenCalledTimes(1);
+    expect(mockedComplete).not.toHaveBeenCalled();
   });
 
   it("diagnoses a photo and grounds the treatment in the KB", async () => {
@@ -124,12 +124,13 @@ describe("brain routing", () => {
     expect(brain["store"].get("c1").lastDiagnosis).toBeUndefined();
   });
 
-  it("asks for a photo when disease is described in words", async () => {
-    mockedComplete.mockResolvedValue("Bimari dekhne ke liye patte ki photo bhejo, phir bata paoonga.");
+  it("asks for a photo when disease is described in words (now grounded from KB)", async () => {
     const brain = newBrain();
+    await brain.handle(msg("c1", "meri fasal tomato hai"));
     const r = await brain.handle(msg("c1", "tomato ke patte peele ho rahe hain"));
     expect(r.text).toContain("photo");
-    expect(mockedComplete).toHaveBeenCalledTimes(1);
+    // No LLM call — grounded from KB symptom matcher
+    expect(mockedComplete).not.toHaveBeenCalled();
   });
 
   it("answers a general question through the LLM", async () => {
@@ -137,6 +138,50 @@ describe("brain routing", () => {
     const brain = newBrain();
     const r = await brain.handle(msg("c1", "kya khana banaun"));
     expect(r.text).toContain("bhindi");
+  });
+
+  it("grounds a wheat 'safed dhabe' text symptom to Powdery Mildew from KB", async () => {
+    const brain = newBrain();
+    const r = await brain.handle(msg("c1", "meri gehu ki kheti mein safed dhabe lag rahe hain"));
+    expect(r.text).toMatch(/Powdery Mildew|Churni/i);
+    expect(r.blocks?.some((b) => b.type === "heading")).toBe(true);
+    expect(mockedComplete).not.toHaveBeenCalled();
+  });
+
+  it("extracts 'ranchi ilake' as the district from a combined message", async () => {
+    const brain = newBrain();
+    await brain.handle(msg("c1", "bhai meri fasal mein safed dhabe lag rahe hain meri gehu ki kheti hai mein ranchi ilake mein kheti karta hun"));
+    expect(brain["store"].get("c1").profile.district).toBe("ranchi");
+    expect(brain["store"].get("c1").profile.crop).toBe("wheat");
+  });
+
+  it("routes 'samadhan batao' to the ilaj flow (no LLM round-trip)", async () => {
+    mockedCompleteJson.mockResolvedValue({
+      disease: "Early Blight",
+      crop: "tomato",
+      confidence: 0.9,
+      organic: "neem",
+      chemical: "mancozeb",
+      prevention: "rotation",
+      note: "purane patte",
+    });
+    const brain = newBrain();
+    await brain.handle(msg("c1", "meri fasal tomato hai"));
+    await brain.handle(msg("c1", "", [
+      { data: "aGVsbG8=", mimeType: "image/jpeg", name: "leaf.jpg" },
+    ]));
+    mockedCompleteJson.mockClear();
+    const r = await brain.handle(msg("c1", "koi samadhan batao mujhe"));
+    expect(r.text).toMatch(/mancozeb/i);
+    expect(mockedComplete).not.toHaveBeenCalled();
+  });
+
+  it("rejects garbage LLM output and asks for a photo/rewrite", async () => {
+    mockedComplete.mockResolvedValue(").");
+    const brain = newBrain();
+    const r = await brain.handle(msg("c1", "kya karun"));
+    expect(r.text).toContain("Samajh nahi paya");
+    expect(mockedComplete).toHaveBeenCalled();
   });
 
   it("morning advisory is null when there is no profile", async () => {
@@ -154,11 +199,11 @@ describe("brain routing", () => {
         { date: "2026-08-10", tMax: 32, tMin: 26, rainMm: 0, rainProb: 10, windKmh: 12, uv: 7 },
       ],
     });
-    mockedComplete.mockResolvedValue("Bhubaneswar ka mausam: aaj sookha, kal barish ka chance. Tomato ke liye paani kam dein.");
     const brain = newBrain();
     await brain.handle(msg("c1", "hamara gaon Bhubaneswar hai"));
     const r = await brain.handleValue("c1", "mausam");
     expect(r.text).toContain("Bhubaneswar");
+    expect(mockedComplete).not.toHaveBeenCalled();
   });
 
   it("routes a tapped Ilaj button to the stored treatment", async () => {

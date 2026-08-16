@@ -94,8 +94,8 @@ function mergeReply(spec: ReplySpec): { text: string; blocks?: ReplySpec["blocks
       .map((b) => {
         if (b.type === "card") return `[Card: ${b.title}]`;
         if (b.type === "heading") return `[${b.text}]`;
-        if (b.type === "fields") return `[Fields: ${b.fields.length} items]`;
-        if (b.type === "list") return `[List: ${b.items.length} items]`;
+        if (b.type === "fields") return `[Fields: ${(b.fields ?? []).length} items]`;
+        if (b.type === "list") return `[List: ${(b.items ?? []).length} items]`;
         if (b.type === "image") return `[Image]`;
         return `[${b.type}]`;
       })

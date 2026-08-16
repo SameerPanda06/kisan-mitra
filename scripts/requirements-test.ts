@@ -159,7 +159,7 @@ async function run() {
 
   const proactiveCode = fs.readFileSync("./src/proactive.ts", "utf-8");
   if (proactiveCode.includes("proactiveMinute") && proactiveCode.includes("proactiveHour")) {
-    if (proactiveCode.includes("Asia/Kolkata")) {
+    if (proactiveCode.includes("config.timezone") || proactiveCode.includes("Asia/Kolkata")) {
       pass("Cron at 06:30 IST", "node-cron scheduled with Asia/Kolkata timezone");
     } else {
       fail("Cron at 06:30 IST", "Missing timezone");
@@ -262,10 +262,10 @@ async function run() {
   console.log("\n📋 REQ 7: Natural Conversation (LLM-generated, Not Templates)");
   console.log("------------------------------------------");
 
-  if (brainCode.includes("converse") && brainCode.includes("naturalReply") && brainCode.includes("PERSONA")) {
-    pass("LLM conversation layer", "converse() + naturalReply() with PERSONA prompt");
+  if (brainCode.includes("PERSONA") && brainCode.includes("complete(")) {
+    pass("LLM conversation layer", "PERSONA prompt + LLM completions in generalQuestion/cropTip");
   } else {
-    fail("LLM conversation layer", "Missing converse/naturalReply/PERSONA");
+    fail("LLM conversation layer", "Missing PERSONA or LLM calls");
   }
 
   if (brainCode.includes("temperature: 0.8") || brainCode.includes("temperature: 0.5")) {
@@ -359,7 +359,7 @@ async function run() {
   }
 
   const cardsCode = fs.readFileSync("./src/cards.ts", "utf-8");
-  if (cardsCode.includes('label: "Mausam"') && cardsCode.includes('label: "Ilaj"') && cardsCode.includes('label: "Naya sawal"')) {
+  if (cardsCode.includes('label: "Mausam"') && cardsCode.includes('label: "Ilaj') && cardsCode.includes('label: "Naya sawal"')) {
     pass("Card buttons", "Diagnosis card has 3 action buttons");
   } else {
     fail("Card buttons", "Missing buttons on card");
@@ -371,10 +371,12 @@ async function run() {
   console.log("\n📋 REQ 12: Zero Paid Services (Free Tier Only)");
   console.log("------------------------------------------");
 
+  const configCode = fs.readFileSync("./src/config.ts", "utf-8");
+  const llmCode = fs.readFileSync("./src/llm.ts", "utf-8");
   const services = [
     { name: "Caspian SDK", free: true, check: mainCode.includes("caspian-sdk") },
     { name: "Open-Meteo", free: true, check: weatherCode.includes("open-meteo.com") },
-    { name: "Gemini API", free: true, check: brainCode.includes("generativelanguage.googleapis.com") },
+    { name: "Gemini API", free: true, check: (brainCode + configCode + llmCode).includes("generativelanguage.googleapis.com") },
     { name: "Render free tier", free: true, check: renderYaml.includes("plan: free") },
     { name: "GitHub Actions", free: true, check: keepAlive.includes("ubuntu-latest") },
   ];

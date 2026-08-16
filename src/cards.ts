@@ -27,9 +27,17 @@ export function helpCard(): Block[] {
     {
       type: "list",
       items: [
-        "1. Patte ki photo bhejein, bimari bata doonga aur ilaaj",
-        "2. 'mausam' likhein, 3 din ka purvabhas",
-        "3. 'meri fasal tomato hai' likh kar profile set karein",
+        "📸 **Patte ki photo bhejein** → bimari + ilaaj",
+        "☁️ **/weather** ya **mausam** → 3 din ka purvabhas",
+        "🌱 **/set crop <naam>** → fasal set karein (jaise: /set crop tomato)",
+        "📍 **/set location <gaon>** → apna gaon/sheher set karein",
+        "🌾 **/crop** → sab fasalen dekhiye, **/crop <naam>** → detail",
+        "📝 **/problem list** → sab problems ki list",
+        "✅ **/outcome <fasal> <id> <resolved|improved|same|worsened>** → result update karein",
+        "🕐 **/history** → command history dekhiye",
+        "📍 **/location list|add|default|remove** → locations manage karein",
+        "👤 **/set name <naam> | /set acreage <zameen>** → profile complete karein",
+        "🗑️ **/delete yes** → **pura memory delete karein** (profile, fasal, history, sab)",
       ],
     },
   ];
